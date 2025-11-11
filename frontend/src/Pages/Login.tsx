@@ -20,8 +20,8 @@ export default function Login() {
 
       <SVG svgName="Star-1" scale="700px" className="fixed animate-spin-slow-5 text-accent" />
 
-      <div className="fixed top-12 left-38 scale-500" >
-        <EncryptedText text="Gro-Story" />
+      <div className="fixed top-12 left-50 scale-400 font-[OnelySans] underline italic" >
+        <EncryptedText text="Nature's Basket" />
       </div>
 
       <UserLogin />
