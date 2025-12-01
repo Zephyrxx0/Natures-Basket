@@ -12,13 +12,23 @@ import {
   CarouselItem,
   type CarouselApi,
 } from "@/components/ui/carousel";
-
-//Auth (MongoDB placeholder)
-import { signUp, logIn } from "../../utils/auth";
+import LineBreak from "./Linebreak";
 
 //Routing
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../utils/AuthContext";
+
+// Guest credentials
+const GUEST_EMAIL = 'guest@email.com';
+const GUEST_PASSWORD = 'password';
+
+// Verification logic
+const verifyCredentials = (email: string, password: string): { valid: boolean; error?: string } => {
+  if (email === GUEST_EMAIL && password === GUEST_PASSWORD) {
+    return { valid: true };
+  }
+  return { valid: false, error: 'Invalid credentials. Use guest@email.com / password' };
+};
 
 //Props Structure for Sign-up and Log-in forms
 interface FormProps {
@@ -31,20 +41,25 @@ function SignupForm({ onNavigate }: FormProps) {
   const { setUser } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("Form submitted");
 
-    try{
-      const user = await signUp(email, password);
-      setUser(user); // Update auth context
-      toast.success("Account created successfully!");
-      navigate("/home"); // Redirect to home
-    } catch (error: any) {
-      console.error("sign up failed", error);
-      
-      // Handle authentication errors
-      toast.error(error.message || "Sign up failed. Please try again");
+    const verification = verifyCredentials(email, password);
+    
+    if (verification.valid) {
+      const user = {
+        uid: 'guest-user',
+        email: GUEST_EMAIL,
+        displayName: 'Guest User'
+      };
+      localStorage.setItem('user', JSON.stringify(user));
+      setUser(user);
+      toast.success("Logged in successfully!");
+      navigate("/home");
+    } else {
+      console.error("Login failed", verification.error);
+      toast.error(verification.error || "Invalid credentials");
     }
   };
 
@@ -54,7 +69,7 @@ function SignupForm({ onNavigate }: FormProps) {
         Welcome to Gro-Story
       </h2>
       <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-        Get your groceries in dash!
+        Demo account only
       </p>
 
       <form className="my-8 text-amber-950" onSubmit={handleSubmit}>
@@ -62,7 +77,7 @@ function SignupForm({ onNavigate }: FormProps) {
           <Label htmlFor="signup-email">Email Address</Label>
           <Input
             id="signup-email"
-            placeholder="Enter Your email"
+            placeholder="Email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -72,7 +87,7 @@ function SignupForm({ onNavigate }: FormProps) {
           <Label htmlFor="signup-password">Password</Label>
           <Input
             id="signup-password"
-            placeholder="Enter Your password"
+            placeholder="Password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -83,7 +98,7 @@ function SignupForm({ onNavigate }: FormProps) {
           className="group/btn relative block h-10 w-full rounded-md bg-primary font-medium text-primary-foreground shadow-[0px_1px_0px_0px_oklch(var(--primary-foreground)/.25)_inset,0px_-1px_0px_0px_oklch(var(--primary-foreground)/.25)_inset]"
           type="submit"
         >
-          Sign Up &rarr;
+          Continue &rarr;
           <BottomGradient />
         </button>
 
@@ -106,37 +121,47 @@ function LoginForm({ onNavigate }: FormProps) {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("Form submitted");
 
-    try {
-      const user = await logIn(email, password);
-      setUser(user); // Update auth context
+    const verification = verifyCredentials(email, password);
+    
+    if (verification.valid) {
+      const user = {
+        uid: 'guest-user',
+        email: GUEST_EMAIL,
+        displayName: 'Guest User'
+      };
+      localStorage.setItem('user', JSON.stringify(user));
+      setUser(user);
       toast.success("Login successful!");
-      navigate("/home"); // Redirect to home
-    } catch (error: any) {
-      console.error("Login failed", error);
-      
-      // Handle authentication errors
-      toast.error(error.message || "Login failed. Please try again");
+      navigate("/home");
+    } else {
+      console.error("Login failed", verification.error);
+      toast.error(verification.error || "Invalid credentials");
     }
   };
 
   return (
     <div className="shadow-input mx-auto w-[100%] max-w-md rounded-none bg-card/90 backdrop-blur-[2.5px] p-4 md:rounded-2xl md:p-8 border-2 border-accent">
       <h2 className="text-xl font-bold text-foreground">
-        Welcome to Gro-Story
+        Welcome to Nature's Basket
       </h2>
-      <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-        Get your groceries in dash!
-      </p>
+      {/* <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+        Demo access
+      </p> */}
+
+      <br />
+      <LineBreak></LineBreak>
+      <br />
+
       <form className="my-8 text-amber-950" onSubmit={handleSubmit}>
         <LabelInputContainer className="mb-4 ">
           <Label htmlFor="login-email">Email Address</Label>
           <Input
             id="login-email"
-            placeholder="Enter Your email"
+            placeholder="Email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -146,9 +171,9 @@ function LoginForm({ onNavigate }: FormProps) {
           <Label htmlFor="login-password">Password</Label>
           <Input
             id="login-password"
-            placeholder="Enter Your password"
+            placeholder="Password"
             type="password"
-            value = {password}
+            value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
         </LabelInputContainer>
@@ -165,39 +190,89 @@ function LoginForm({ onNavigate }: FormProps) {
       </form>
 
       <div
-        className="text-foreground text-center cursor-pointer hover:text-primary transition-colors"
+        className="text-foreground text-center cursor-pointer hover:text-border transition-colors"
         onClick={onNavigate}
       >
-        Create an account
+        Sign up
       </div>
     </div>
   );
 }
 
+function AboutMe({ onNavigate }: FormProps) {
+
+  return (
+    <div className="shadow-input mx-auto w-[100%] max-w-md rounded-none bg-card/90 backdrop-blur-[2.5px] p-4 md:rounded-2xl md:p-8 border-2 border-accent">
+      <h1 className="text-3xl">Hi There!</h1>
+      
+      <br />
+      <LineBreak />
+      <br />
+
+      <p>
+        I am <span className="text-border">Zephyr</span>, and I like to code for fun.
+        I am trying to learn React using Typescript and TailwindCSS, 
+        and a couple of extra libraries such as animejs, motion, opentype to expand my knowledgebase.
+      </p>
+      
+      <br />
+      
+      <p>
+        This project is about an online grocery shopping website, <span className="text-border italic underline"> Nature's basket </span>
+         that delivers groceries to your doorstep in a flash! Browse a catalogue of your favourite products,
+        add them to the cart and check out, as simple as that!
+      </p>
+
+      <br />
+      <p className="text-xs">
+        (Be sure to check out my notes for extras :3)
+      </p>
+
+      <br />
+      <LineBreak />
+      <br />
+      <p 
+        className="text-center cursor-pointer hover:text-border"
+        onClick={onNavigate}>
+      Login
+      
+      </p>
+
+    </div>
+  )
+}
 //Login+Signup Carousel
 export default function UserLogin() {
   //setting the api to scroll by clickng text
   const [api, setApi] = React.useState<CarouselApi>();
 
-  const goToSignup = () => {
-    api?.scrollTo(1);
-  };
+  const goToAboutMe = () => {
+    api?.scrollTo(0)
+  }
+
+  // const goToSignup = () => {
+  //   api?.scrollTo(1);
+  // };
 
   const goToLogin = () => {
-    api?.scrollTo(0);
+    api?.scrollTo(1);
   };
 
   return (
     <Carousel setApi={setApi}>
       <CarouselContent>
         <CarouselItem>
-          {" "}
-          <LoginForm onNavigate={goToSignup} />{" "}
+          <AboutMe onNavigate={goToLogin}/>
+        
         </CarouselItem>
         <CarouselItem>
           {" "}
-          <SignupForm onNavigate={goToLogin} />{" "}
+          <LoginForm onNavigate={goToAboutMe} />{" "}
         </CarouselItem>
+        {/* <CarouselItem>
+          {" "}
+          <SignupForm onNavigate={goToLogin} />{" "}
+        </CarouselItem> */}
       </CarouselContent>
     </Carousel>
   );

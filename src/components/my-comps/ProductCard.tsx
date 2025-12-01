@@ -87,7 +87,7 @@ export default function ProductCard({
           {/* Add to Cart Button */}
           <Button
             onClick={onAddToCart}
-            className="flex-1 bg-border text-background hover:bg-border/90 transition-colors"
+            className="flex-1 bg-border text-background hover:bg-border/90 transition-colors cursor-pointer"
           >
             ADD TO CART
           </Button>

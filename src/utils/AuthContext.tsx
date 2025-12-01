@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { getStoredUser, verifyToken } from "./auth";
 
 interface User {
     uid: string;
@@ -26,19 +25,12 @@ export const AuthProvider = ({ children }: {children: React.ReactNode}) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const initAuth = async () => {
+        const initAuth = () => {
             try {
-                // First check localStorage for user
-                const storedUser = getStoredUser();
-                if (storedUser) {
-                    // Verify the token is still valid
-                    const verifiedUser = await verifyToken();
-                    if (verifiedUser) {
-                        setUser(verifiedUser);
-                    } else {
-                        // Token invalid, clear stored user
-                        setUser(null);
-                    }
+                // Check localStorage for user
+                const userStr = localStorage.getItem('user');
+                if (userStr) {
+                    setUser(JSON.parse(userStr));
                 } else {
                     setUser(null);
                 }

@@ -4,18 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"npm run frontend:dev\" \"npm run backend:dev\"",
-    "frontend:dev": "vite",
-    "backend:dev": "cd ../backend && npm run dev",
+    "dev": "vite",
     "build": "tsc -b && vite build",
-    "frontend:build": "tsc -b && vite build",
-    "backend:build": "cd ../backend && npm run build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "frontend:preview": "vite preview",
-    "frontend:install": "npm install",
-    "backend:install": "cd ../backend && npm install",
-    "install:all": "npm run frontend:install && npm run backend:install"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@radix-ui/react-aspect-ratio": "^1.1.8",
@@ -48,7 +40,6 @@
     "@types/react": "^19.1.16",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.4",
-    "concurrently": "^9.2.1",
     "eslint": "^9.36.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.22",

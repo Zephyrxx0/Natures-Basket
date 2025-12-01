@@ -23,10 +23,17 @@ import ShopIcon from "../components/my-comps/ShopIcon";
 import Footer from "../components/my-comps/Footer";
 import GithubIcon from "../components/my-comps/GithubIcon";
 import { useAuth } from '../utils/AuthContext';
-import { logOut, updateProfile } from '../utils/auth';
+import { FileText } from "lucide-react";
 
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+
+// Local logout function
+const handleLogoutLocal = (setUser: (user: null) => void) => {
+  localStorage.removeItem('user');
+  localStorage.removeItem('cart');
+  setUser(null);
+};
 
 interface GroceryItem {
   id: number;
@@ -35,6 +42,7 @@ interface GroceryItem {
   image: string;
   category: string;
   brand: string;
+  price?: number;
 }
 
 export default function Shop() {
@@ -46,16 +54,54 @@ export default function Shop() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const { addItem } = useCart();
 
-  const itemsPerPage = 20; // 100 items / 5 pages = 20 items per page
+  const itemsPerPage = 20; 
 
   useEffect(() => {
     const fetchItems = async () => {
       try {
         const data = await get_all_items();
-        // Fix double slashes in image URLs
+        
+        // Function to get price for an item based on category
+        const getPriceByCategory = (item: GroceryItem): number => {
+          const category =
+            typeof item.category === "string" ? item.category.toLowerCase() : "";
+          const name = typeof item.name === "string" ? item.name.toLowerCase() : "";
+
+          if (
+            category.includes("fruit") ||
+            name.includes("apple") ||
+            name.includes("orange") ||
+            name.includes("banana")
+          ) {
+            return Math.floor(Math.random() * 50) + 40; // ₹40-90
+          } else if (category.includes("vegetable")) {
+            return Math.floor(Math.random() * 40) + 30; // ₹30-70
+          } else if (
+            category.includes("dairy") ||
+            name.includes("milk") ||
+            name.includes("cheese")
+          ) {
+            return Math.floor(Math.random() * 60) + 50; // ₹50-110
+          } else if (category.includes("snack") || name.includes("chips")) {
+            return Math.floor(Math.random() * 30) + 20; // ₹20-50
+          } else if (
+            category.includes("beverage") ||
+            name.includes("water") ||
+            name.includes("juice")
+          ) {
+            return Math.floor(Math.random() * 40) + 25; // ₹25-65
+          } else if (category.includes("bakery") || name.includes("bread")) {
+            return Math.floor(Math.random() * 35) + 30; // ₹30-65
+          } else {
+            return Math.floor(Math.random() * 100) + 50; // ₹50-150
+          }
+        };
+
+        // Fix double slashes in image URLs and assign permanent prices
         const fixedData = data.map((item: GroceryItem) => ({
           ...item,
-          image: item.image.replace(/\/\//g, '/').replace('https:/', 'https://')
+          image: item.image.replace(/\/\//g, '/').replace('https:/', 'https://'),
+          price: getPriceByCategory(item)
         }));
         setItems(fixedData.slice(0, 100)); // Get first 100 items
         setIsLoading(false);
@@ -75,40 +121,7 @@ export default function Shop() {
   const currentItems = items.slice(startIndex, endIndex);
 
   // Price mapping based on category (in Indian Rupees)
-  const getPriceForItem = (item: GroceryItem): number => {
-    const category =
-      typeof item.category === "string" ? item.category.toLowerCase() : "";
-    const name = typeof item.name === "string" ? item.name.toLowerCase() : "";
-
-    if (
-      category.includes("fruit") ||
-      name.includes("apple") ||
-      name.includes("orange") ||
-      name.includes("banana")
-    ) {
-      return Math.floor(Math.random() * 50) + 40; // ₹40-90
-    } else if (category.includes("vegetable")) {
-      return Math.floor(Math.random() * 40) + 30; // ₹30-70
-    } else if (
-      category.includes("dairy") ||
-      name.includes("milk") ||
-      name.includes("cheese")
-    ) {
-      return Math.floor(Math.random() * 60) + 50; // ₹50-110
-    } else if (category.includes("snack") || name.includes("chips")) {
-      return Math.floor(Math.random() * 30) + 20; // ₹20-50
-    } else if (
-      category.includes("beverage") ||
-      name.includes("water") ||
-      name.includes("juice")
-    ) {
-      return Math.floor(Math.random() * 40) + 25; // ₹25-65
-    } else if (category.includes("bakery") || name.includes("bread")) {
-      return Math.floor(Math.random() * 35) + 30; // ₹30-65
-    } else {
-      return Math.floor(Math.random() * 100) + 50; // ₹50-150
-    }
-  };
+  // Note: Prices are now assigned during item fetch and stored with each item
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -119,10 +132,9 @@ export default function Shop() {
     setIsCartOpen(true);
   };
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
     try {
-      await logOut();
-      setUser(null); // Clear user state
+      handleLogoutLocal(setUser);
       toast.success('Logged out successfully');
       navigate('/login');
     } catch (error) {
@@ -131,15 +143,13 @@ export default function Shop() {
     }
   };
 
-  const handleUsernameChange = async (newName: string) => {
+  const handleUsernameChange = (newName: string) => {
     if (user) {
-      try {
-        await updateProfile(user, { displayName: newName });
-        toast.success('Username updated successfully');
-      } catch (error) {
-        console.error('Failed to update username:', error);
-        toast.error('Failed to update username');
-      }
+      // Update local user state with new display name
+      const updatedUser = { ...user, displayName: newName };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      setUser(updatedUser);
+      toast.success('Username updated successfully');
     }
   };
 
@@ -174,6 +184,11 @@ export default function Shop() {
         title: "Github",
         icon: <GithubIcon />,
         href: "https://github.com/Zephyrxx0"
+    },
+        {
+      title : "Notes",
+      icon: <FileText size={24} />,
+      href: "/notes"
     }
   ];
 
@@ -231,12 +246,12 @@ export default function Shop() {
                   item.description ||
                   `Fresh ${item.name} from ${item.brand || "our store"}`
                 }
-                price={getPriceForItem(item)}
+                price={item.price || 0}
                 image={item.image}
                 onAddToCart={() => addItem({
                   id: item.id,
                   name: item.name,
-                  price: getPriceForItem(item),
+                  price: item.price || 0,
                   image: item.image
                 })}
               />

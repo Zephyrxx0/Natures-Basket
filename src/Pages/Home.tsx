@@ -13,6 +13,7 @@ import Cart from "@/components/my-comps/Cart";
 import ShopIcon from "@/components/my-comps/ShopIcon";
 import GithubIcon from "@/components/my-comps/GithubIcon";
 import CartSidePanel from "@/components/my-comps/CartSidePanel";
+import { FileText } from "lucide-react";
 
 //images
 import groceryImage from "@/assets/images/grocery.jpg";
@@ -24,10 +25,16 @@ import { useState, useEffect } from "react";
 // import { useCart } from "@/contexts/CartContext";
 import { get_item_by_name} from '../utils/grocery_item';
 import { useAuth } from '../utils/AuthContext';
-import { logOut, updateProfile } from '../utils/auth';
 
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+
+// Local logout function
+const handleLogoutLocal = (setUser: (user: null) => void) => {
+  localStorage.removeItem('user');
+  localStorage.removeItem('cart');
+  setUser(null);
+};
 
 export default function Home() {
   const navigate = useNavigate();
@@ -87,10 +94,9 @@ export default function Home() {
     setIsCartOpen(true);
   };
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
     try {
-      await logOut();
-      setUser(null); // Clear user state
+      handleLogoutLocal(setUser);
       toast.success('Logged out successfully');
       navigate('/login');
     } catch (error) {
@@ -99,15 +105,13 @@ export default function Home() {
     }
   };
 
-  const handleUsernameChange = async (newName: string) => {
+  const handleUsernameChange = (newName: string) => {
     if (user) {
-      try {
-        await updateProfile(user, { displayName: newName });
-        toast.success('Username updated successfully');
-      } catch (error) {
-        console.error('Failed to update username:', error);
-        toast.error('Failed to update username');
-      }
+      // Update local user state with new display name
+      const updatedUser = { ...user, displayName: newName };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      setUser(updatedUser);
+      toast.success('Username updated successfully');
     }
   };
 
@@ -142,6 +146,11 @@ export default function Home() {
         title: "Github",
         icon: <GithubIcon />,
         href: "https://github.com/Zephyrxx0"
+    },
+    {
+      title : "Notes",
+      icon: <FileText size={24} />,
+      href: "/notes"
     }
   ];
 
