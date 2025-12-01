@@ -23,6 +23,7 @@ import ShopIcon from "../components/my-comps/ShopIcon";
 import Footer from "../components/my-comps/Footer";
 import GithubIcon from "../components/my-comps/GithubIcon";
 import { useAuth } from '../utils/AuthContext';
+import { FileText } from "lucide-react";
 
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -183,6 +184,11 @@ export default function Shop() {
         title: "Github",
         icon: <GithubIcon />,
         href: "https://github.com/Zephyrxx0"
+    },
+        {
+      title : "Notes",
+      icon: <FileText size={24} />,
+      href: "/notes"
     }
   ];
 
