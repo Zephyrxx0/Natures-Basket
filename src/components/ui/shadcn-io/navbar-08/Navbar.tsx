@@ -2,13 +2,12 @@
 
 import * as React from 'react';
 import { useEffect, useState, useRef, useId } from 'react';
-import { SearchIcon, MoonIcon, SunIcon, UserIcon, ChevronDownIcon, Edit2Icon, CheckIcon, XIcon } from 'lucide-react';
+import { SearchIcon, MoonIcon, SunIcon, ChevronDownIcon, Edit2Icon, CheckIcon, XIcon } from 'lucide-react';
 import { Button } from '../../button';
 import { Input } from '../../input';
 import {
   NavigationMenu,
   NavigationMenuItem,
-  NavigationMenuLink,
   NavigationMenuList,
 } from '../../navigation-menu';
 import {
@@ -25,14 +24,12 @@ import {
   DropdownMenuTrigger,
 } from '../../dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '../../avatar';
-import { Badge } from '../../badge';
 import { cn } from '@/lib/utils';
-import type { ComponentProps } from 'react';
 
 import SVG from '../../svg-comp';
 
 // Simple logo component for the navbar
-const Logo = (props: React.SVGAttributes<SVGElement>) => {
+const Logo = (_props: React.SVGAttributes<SVGElement>) => {
   return (
     <SVG svgName='Star-3' scale='35px' className='text-border'/>
   );

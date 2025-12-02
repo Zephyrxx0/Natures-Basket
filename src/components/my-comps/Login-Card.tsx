@@ -35,85 +35,85 @@ interface FormProps {
   onNavigate: () => void;
 }
 
-function SignupForm({ onNavigate }: FormProps) {
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const { setUser } = useAuth();
-  const navigate = useNavigate();
+// function SignupForm({ onNavigate }: FormProps) {
+//   const [email, setEmail] = React.useState("");
+//   const [password, setPassword] = React.useState("");
+//   const { setUser } = useAuth();
+//   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log("Form submitted");
+//   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+//     e.preventDefault();
+//     console.log("Form submitted");
 
-    const verification = verifyCredentials(email, password);
+//     const verification = verifyCredentials(email, password);
     
-    if (verification.valid) {
-      const user = {
-        uid: 'guest-user',
-        email: GUEST_EMAIL,
-        displayName: 'Guest User'
-      };
-      localStorage.setItem('user', JSON.stringify(user));
-      setUser(user);
-      toast.success("Logged in successfully!");
-      navigate("/home");
-    } else {
-      console.error("Login failed", verification.error);
-      toast.error(verification.error || "Invalid credentials");
-    }
-  };
+//     if (verification.valid) {
+//       const user = {
+//         uid: 'guest-user',
+//         email: GUEST_EMAIL,
+//         displayName: 'Guest User'
+//       };
+//       localStorage.setItem('user', JSON.stringify(user));
+//       setUser(user);
+//       toast.success("Logged in successfully!");
+//       navigate("/home");
+//     } else {
+//       console.error("Login failed", verification.error);
+//       toast.error(verification.error || "Invalid credentials");
+//     }
+//   };
 
-  return (
-    <div className="shadow-input mx-auto w-[100%] max-w-md rounded-none bg-card/90 backdrop-blur-[2.5px] p-4 md:rounded-2xl md:p-8 border-2 border-accent">
-      <h2 className="text-xl font-bold text-foreground">
-        Welcome to Gro-Story
-      </h2>
-      <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-        Demo account only
-      </p>
+//   return (
+//     <div className="shadow-input mx-auto w-[100%] max-w-md rounded-none bg-card/90 backdrop-blur-[2.5px] p-4 md:rounded-2xl md:p-8 border-2 border-accent">
+//       <h2 className="text-xl font-bold text-foreground">
+//         Welcome to Gro-Story
+//       </h2>
+//       <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+//         Demo account only
+//       </p>
 
-      <form className="my-8 text-amber-950" onSubmit={handleSubmit}>
-        <LabelInputContainer className="mb-4 ">
-          <Label htmlFor="signup-email">Email Address</Label>
-          <Input
-            id="signup-email"
-            placeholder="Email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </LabelInputContainer>
-        <LabelInputContainer className="mb-4">
-          <Label htmlFor="signup-password">Password</Label>
-          <Input
-            id="signup-password"
-            placeholder="Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </LabelInputContainer>
+//       <form className="my-8 text-amber-950" onSubmit={handleSubmit}>
+//         <LabelInputContainer className="mb-4 ">
+//           <Label htmlFor="signup-email">Email Address</Label>
+//           <Input
+//             id="signup-email"
+//             placeholder="Email"
+//             type="email"
+//             value={email}
+//             onChange={(e) => setEmail(e.target.value)}
+//           />
+//         </LabelInputContainer>
+//         <LabelInputContainer className="mb-4">
+//           <Label htmlFor="signup-password">Password</Label>
+//           <Input
+//             id="signup-password"
+//             placeholder="Password"
+//             type="password"
+//             value={password}
+//             onChange={(e) => setPassword(e.target.value)}
+//           />
+//         </LabelInputContainer>
 
-        <button
-          className="group/btn relative block h-10 w-full rounded-md bg-primary font-medium text-primary-foreground shadow-[0px_1px_0px_0px_oklch(var(--primary-foreground)/.25)_inset,0px_-1px_0px_0px_oklch(var(--primary-foreground)/.25)_inset]"
-          type="submit"
-        >
-          Continue &rarr;
-          <BottomGradient />
-        </button>
+//         <button
+//           className="group/btn relative block h-10 w-full rounded-md bg-primary font-medium text-primary-foreground shadow-[0px_1px_0px_0px_oklch(var(--primary-foreground)/.25)_inset,0px_-1px_0px_0px_oklch(var(--primary-foreground)/.25)_inset]"
+//           type="submit"
+//         >
+//           Continue &rarr;
+//           <BottomGradient />
+//         </button>
 
-        <div className="my-8 h-[1px] w-full bg-gradient-to-r from-transparent via-border to-transparent" />
-      </form>
+//         <div className="my-8 h-[1px] w-full bg-gradient-to-r from-transparent via-border to-transparent" />
+//       </form>
 
-      <div
-        className="text-foreground text-center cursor-pointer hover:text-primary transition-colors"
-        onClick={onNavigate}
-      >
-        Login
-      </div>
-    </div>
-  );
-}
+//       <div
+//         className="text-foreground text-center cursor-pointer hover:text-primary transition-colors"
+//         onClick={onNavigate}
+//       >
+//         Login
+//       </div>
+//     </div>
+//   );
+// }
 
 function LoginForm({ onNavigate }: FormProps) {
   const navigate = useNavigate();

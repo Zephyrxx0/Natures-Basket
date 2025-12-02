@@ -1,7 +1,7 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
-import { IconArrowNarrowLeft, IconArrowNarrowRight } from "@tabler/icons-react";
-import { cn } from "@/lib/utils";
+import { useEffect, useRef, useState } from "react";
+// import { IconArrowNarrowLeft, IconArrowNarrowRight } from "@tabler/icons-react";
+// import { cn } from "@/lib/utils";
 import { Card as FocusCard } from "./focus-cards";
 
 interface CarouselProps {
@@ -13,7 +13,7 @@ export const Carousel = ({ cards, initialScroll = 0 }: CarouselProps) => {
   const carouselRef = useRef<HTMLDivElement>(null);
   const [hovered, setHovered] = useState<number | null>(null);
   const [isPaused, setIsPaused] = useState(false);
-  const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Duplicate cards for infinite loop effect
   const infiniteCards = [...cards, ...cards, ...cards];
@@ -33,7 +33,7 @@ export const Carousel = ({ cards, initialScroll = 0 }: CarouselProps) => {
 
       scrollIntervalRef.current = setInterval(() => {
         if (!isPaused && carouselRef.current) {
-          const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current;
+          const { scrollLeft, scrollWidth } = carouselRef.current;
           
           // Check if we've scrolled past the first set of cards
           const cardSetWidth = scrollWidth / 3;

@@ -17,8 +17,8 @@ import { FileText } from "lucide-react";
 
 //images
 import groceryImage from "@/assets/images/grocery.jpg";
-import appleImage from "@/assets/images/apple.jpg";
-import orangeImage from "@/assets/images/orange.jpg";
+// import appleImage from "@/assets/images/apple.jpg";
+// import orangeImage from "@/assets/images/orange.jpg";
 
 //functions and hooks
 import { useState, useEffect } from "react";
@@ -71,10 +71,10 @@ export default function Home() {
       } catch (error) {
         console.error("Failed to fetch grocery items:", error);
         // Fallback to local images
-        setGroceryItems([
-          { title: "Apple", src: appleImage },
-          { title: "Orange", src: orangeImage }
-        ]);
+        // setGroceryItems([
+        //   { title: "Apple", src: appleImage },
+        //   { title: "Orange", src: orangeImage }
+        // ]);
       }
     }
 
