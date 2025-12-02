@@ -13,6 +13,7 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import LineBreak from "./Linebreak";
+import LoginInfo from "./InfoHover";
 
 //Routing
 import { useNavigate } from "react-router-dom";
@@ -145,6 +146,11 @@ function LoginForm({ onNavigate }: FormProps) {
 
   return (
     <div className="shadow-input mx-auto w-[100%] max-w-md rounded-none bg-card/90 backdrop-blur-[2.5px] p-4 md:rounded-2xl md:p-8 border-2 border-accent">
+      
+      <div className="absolute right-8 ">
+        <LoginInfo />
+      </div>
+      
       <h2 className="text-xl font-bold text-foreground">
         Welcome to Nature's Basket
       </h2>
