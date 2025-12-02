@@ -32,3 +32,12 @@ temp_fix.txt
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+# Miscellaneous
+temp_fix.txt
+.env
+.env.*
+!.env.example
+Thumbs.db
+ehthumbs.db
+Desktop.ini
