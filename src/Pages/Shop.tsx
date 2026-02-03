@@ -28,13 +28,6 @@ import { FileText } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
-// Local logout function
-const handleLogoutLocal = (setUser: (user: null) => void) => {
-  localStorage.removeItem('user');
-  localStorage.removeItem('cart');
-  setUser(null);
-};
-
 interface GroceryItem {
   id: number;
   name: string;
@@ -47,7 +40,7 @@ interface GroceryItem {
 
 export default function Shop() {
   const navigate = useNavigate();
-  const { user, setUser } = useAuth();
+  const { user, logout } = useAuth();
   const [items, setItems] = useState<GroceryItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
@@ -132,9 +125,9 @@ export default function Shop() {
     setIsCartOpen(true);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     try {
-      handleLogoutLocal(setUser);
+      await logout();
       toast.success('Logged out successfully');
       navigate('/login');
     } catch (error) {
@@ -143,13 +136,10 @@ export default function Shop() {
     }
   };
 
-  const handleUsernameChange = (newName: string) => {
+  const handleUsernameChange = (_newName: string) => {
     if (user) {
-      // Update local user state with new display name
-      const updatedUser = { ...user, displayName: newName };
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      setUser(updatedUser);
-      toast.success('Username updated successfully');
+      // Note: To update display name, you'd need to implement updateProfile in AuthContext
+      toast.info('Username update coming soon');
     }
   };
 

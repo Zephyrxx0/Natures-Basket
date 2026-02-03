@@ -1,4 +1,6 @@
-import { createContext, useContext, useState, type ReactNode, useEffect } from 'react';
+import { createContext, useContext, useState, type ReactNode, useEffect, useCallback } from 'react';
+import { doc, setDoc, onSnapshot, deleteDoc } from 'firebase/firestore';
+import { db } from '../utils/firebase';
 import { useAuth } from '../utils/AuthContext';
 
 interface CartItem {
@@ -24,15 +26,36 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
-  const [loading, setLoading] = useState(false);
-  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const { user, loading: authLoading } = useAuth();
 
-  // Load cart from localStorage when user changes
+  // Save cart to Firestore
+  const saveCartToFirestore = useCallback(async (cartItems: CartItem[]) => {
+    if (!user) return;
+    
+    try {
+      const cartRef = doc(db, 'carts', user.uid);
+      if (cartItems.length === 0) {
+        await deleteDoc(cartRef);
+      } else {
+        await setDoc(cartRef, {
+          items: cartItems,
+          updatedAt: new Date()
+        });
+      }
+    } catch (error) {
+      console.error('Error saving cart to Firestore:', error);
+    }
+  }, [user]);
+
+  // Load cart from Firestore when user changes
   useEffect(() => {
-    const loadCart = () => {
+    // Wait for auth to finish loading
+    if (authLoading) return;
+    
+    // If no user, use localStorage
+    if (!user) {
       try {
-        setLoading(true);
-        // Load from localStorage only (guest local storage)
         const localCart = localStorage.getItem('cart');
         if (localCart) {
           setItems(JSON.parse(localCart));
@@ -40,22 +63,63 @@ export function CartProvider({ children }: { children: ReactNode }) {
           setItems([]);
         }
       } catch (error) {
-        console.error('Error loading cart:', error);
+        console.error('Error loading cart from localStorage:', error);
         setItems([]);
-      } finally {
+      }
+      setLoading(false);
+      return;
+    }
+
+    // Subscribe to Firestore cart updates for logged-in users
+    setLoading(true);
+    const cartRef = doc(db, 'carts', user.uid);
+    
+    const unsubscribe = onSnapshot(
+      cartRef,
+      (snapshot) => {
+        if (snapshot.exists()) {
+          const data = snapshot.data();
+          setItems(data.items || []);
+        } else {
+          // Check if there's a local cart to migrate
+          const localCart = localStorage.getItem('cart');
+          if (localCart) {
+            const localItems = JSON.parse(localCart);
+            setItems(localItems);
+            // Save local cart to Firestore
+            saveCartToFirestore(localItems);
+            // Clear local storage
+            localStorage.removeItem('cart');
+          } else {
+            setItems([]);
+          }
+        }
+        setLoading(false);
+      },
+      (error) => {
+        console.error('Error listening to cart:', error);
         setLoading(false);
       }
-    };
+    );
 
-    loadCart();
-  }, [user]);
+    return () => unsubscribe();
+  }, [user, authLoading, saveCartToFirestore]);
 
-  // Save cart to localStorage when items change
+  // Save cart when items change (for logged-in users, save to Firestore; for guests, save to localStorage)
   useEffect(() => {
-    if (items.length > 0) {
-      localStorage.setItem('cart', JSON.stringify(items));
+    // Don't save during initial loading
+    if (loading || authLoading) return;
+    
+    if (user) {
+      saveCartToFirestore(items);
+    } else {
+      if (items.length > 0) {
+        localStorage.setItem('cart', JSON.stringify(items));
+      } else {
+        localStorage.removeItem('cart');
+      }
     }
-  }, [items]);
+  }, [items, user, loading, authLoading, saveCartToFirestore]);
 
   const addItem = (item: Omit<CartItem, 'quantity'>) => {
     setItems((prevItems) => {
@@ -90,7 +154,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clearCart = () => {
     setItems([]);
-    localStorage.removeItem('cart');
+    if (!user) {
+      localStorage.removeItem('cart');
+    }
+    // Firestore will be updated by the useEffect
   };
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);

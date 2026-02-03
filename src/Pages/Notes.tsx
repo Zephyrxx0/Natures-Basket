@@ -61,16 +61,29 @@ export default function Notes() {
                 // className = "[mask-image:radial-gradient(800px_circle_at_center,white,transparent)]"
                 strokeDasharray="5 10"
             />
-
+          <div className="absolute left-auto top-auto">
             <div className="text-4xl">
                 Notes
             </div>
             <br />
             <br />
             <div className="italics">
-                to be done...
-            </div>
+                <h1> Authorization </h1>
+                <p> 1. Firebase </p>
+                <p> 2. MongoDB SQL</p>
+                <p> 3. Hardwired Login <i>(current, because of hosting)</i></p>
+                
+                <h1>Enhancements</h1>
+                <p> 1. Fonts </p>
+                <p> 2. Animations </p>
+                <p> 3. Better Cards in shop page</p>
 
+                <h1> To Do: (Open to PRs)</h1>
+                <p> 1. Cheque Print (md, pdf etc)</p>
+                <p> 2. Mobile layout</p>
+                <p> 3. Components for loading pages</p>
+            </div>
+          </div>
             <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50">
                 <FloatingDock items={dockItems} />
             </div>   

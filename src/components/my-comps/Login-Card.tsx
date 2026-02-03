@@ -19,16 +19,26 @@ import LoginInfo from "./InfoHover";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../utils/AuthContext";
 
-// Guest credentials
-const GUEST_EMAIL = 'guest@email.com';
-const GUEST_PASSWORD = 'password';
-
-// Verification logic
-const verifyCredentials = (email: string, password: string): { valid: boolean; error?: string } => {
-  if (email === GUEST_EMAIL && password === GUEST_PASSWORD) {
-    return { valid: true };
+// Firebase auth error messages
+const getFirebaseErrorMessage = (errorCode: string): string => {
+  switch (errorCode) {
+    case 'auth/email-already-in-use':
+      return 'This email is already registered. Try logging in instead.';
+    case 'auth/invalid-email':
+      return 'Please enter a valid email address.';
+    case 'auth/weak-password':
+      return 'Password should be at least 6 characters.';
+    case 'auth/user-not-found':
+      return 'No account found with this email.';
+    case 'auth/wrong-password':
+      return 'Incorrect password. Please try again.';
+    case 'auth/invalid-credential':
+      return 'Invalid credentials. Please check your email and password.';
+    case 'auth/too-many-requests':
+      return 'Too many failed attempts. Please try again later.';
+    default:
+      return 'An error occurred. Please try again.';
   }
-  return { valid: false, error: 'Invalid credentials. Use guest@email.com / password' };
 };
 
 //Props Structure for Sign-up and Log-in forms
@@ -36,111 +46,114 @@ interface FormProps {
   onNavigate: () => void;
 }
 
-// function SignupForm({ onNavigate }: FormProps) {
-//   const [email, setEmail] = React.useState("");
-//   const [password, setPassword] = React.useState("");
-//   const { setUser } = useAuth();
-//   const navigate = useNavigate();
+function SignupForm({ onNavigate }: FormProps) {
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [isLoading, setIsLoading] = React.useState(false);
+  const { signUp } = useAuth();
+  const navigate = useNavigate();
 
-//   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-//     e.preventDefault();
-//     console.log("Form submitted");
-
-//     const verification = verifyCredentials(email, password);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     
-//     if (verification.valid) {
-//       const user = {
-//         uid: 'guest-user',
-//         email: GUEST_EMAIL,
-//         displayName: 'Guest User'
-//       };
-//       localStorage.setItem('user', JSON.stringify(user));
-//       setUser(user);
-//       toast.success("Logged in successfully!");
-//       navigate("/home");
-//     } else {
-//       console.error("Login failed", verification.error);
-//       toast.error(verification.error || "Invalid credentials");
-//     }
-//   };
+    if (!email || !password) {
+      toast.error("Please fill in all fields");
+      return;
+    }
 
-//   return (
-//     <div className="shadow-input mx-auto w-[100%] max-w-md rounded-none bg-card/90 backdrop-blur-[2.5px] p-4 md:rounded-2xl md:p-8 border-2 border-accent">
-//       <h2 className="text-xl font-bold text-foreground">
-//         Welcome to Gro-Story
-//       </h2>
-//       <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-//         Demo account only
-//       </p>
+    setIsLoading(true);
+    try {
+      await signUp(email, password);
+      toast.success("Account created successfully!");
+      navigate("/home");
+    } catch (error: unknown) {
+      const firebaseError = error as { code?: string };
+      const errorMessage = getFirebaseErrorMessage(firebaseError.code || '');
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-//       <form className="my-8 text-amber-950" onSubmit={handleSubmit}>
-//         <LabelInputContainer className="mb-4 ">
-//           <Label htmlFor="signup-email">Email Address</Label>
-//           <Input
-//             id="signup-email"
-//             placeholder="Email"
-//             type="email"
-//             value={email}
-//             onChange={(e) => setEmail(e.target.value)}
-//           />
-//         </LabelInputContainer>
-//         <LabelInputContainer className="mb-4">
-//           <Label htmlFor="signup-password">Password</Label>
-//           <Input
-//             id="signup-password"
-//             placeholder="Password"
-//             type="password"
-//             value={password}
-//             onChange={(e) => setPassword(e.target.value)}
-//           />
-//         </LabelInputContainer>
+  return (
+    <div className="shadow-input mx-auto w-[100%] max-w-md rounded-none bg-card/90 backdrop-blur-[2.5px] p-4 md:rounded-2xl md:p-8 border-2 border-accent">
+      <h2 className="text-xl font-bold text-foreground">
+        Welcome to Gro-Story
+      </h2>
+      <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+        Demo account only
+      </p>
 
-//         <button
-//           className="group/btn relative block h-10 w-full rounded-md bg-primary font-medium text-primary-foreground shadow-[0px_1px_0px_0px_oklch(var(--primary-foreground)/.25)_inset,0px_-1px_0px_0px_oklch(var(--primary-foreground)/.25)_inset]"
-//           type="submit"
-//         >
-//           Continue &rarr;
-//           <BottomGradient />
-//         </button>
+      <form className="my-8 text-amber-950" onSubmit={handleSubmit}>
+        <LabelInputContainer className="mb-4 ">
+          <Label htmlFor="signup-email">Email Address</Label>
+          <Input
+            id="signup-email"
+            placeholder="Email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </LabelInputContainer>
+        <LabelInputContainer className="mb-4">
+          <Label htmlFor="signup-password">Password</Label>
+          <Input
+            id="signup-password"
+            placeholder="Password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </LabelInputContainer>
 
-//         <div className="my-8 h-[1px] w-full bg-gradient-to-r from-transparent via-border to-transparent" />
-//       </form>
+        <button
+          className="group/btn relative block h-10 w-full rounded-md bg-primary font-medium text-primary-foreground shadow-[0px_1px_0px_0px_oklch(var(--primary-foreground)/.25)_inset,0px_-1px_0px_0px_oklch(var(--primary-foreground)/.25)_inset] disabled:opacity-50"
+          type="submit"
+          disabled={isLoading}
+        >
+          {isLoading ? "Creating account..." : "Sign up"} &rarr;
+          <BottomGradient />
+        </button>
 
-//       <div
-//         className="text-foreground text-center cursor-pointer hover:text-primary transition-colors"
-//         onClick={onNavigate}
-//       >
-//         Login
-//       </div>
-//     </div>
-//   );
-// }
+        <div className="my-8 h-[1px] w-full bg-gradient-to-r from-transparent via-border to-transparent" />
+      </form>
+
+      <div
+        className="text-foreground text-center cursor-pointer hover:text-primary transition-colors"
+        onClick={onNavigate}
+      >
+        Login
+      </div>
+    </div>
+  );
+}
 
 function LoginForm({ onNavigate }: FormProps) {
   const navigate = useNavigate();
-  const { setUser } = useAuth();
+  const { signIn } = useAuth();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const [isLoading, setIsLoading] = React.useState(false);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Form submitted");
-
-    const verification = verifyCredentials(email, password);
     
-    if (verification.valid) {
-      const user = {
-        uid: 'guest-user',
-        email: GUEST_EMAIL,
-        displayName: 'Guest User'
-      };
-      localStorage.setItem('user', JSON.stringify(user));
-      setUser(user);
+    if (!email || !password) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await signIn(email, password);
       toast.success("Login successful!");
       navigate("/home");
-    } else {
-      console.error("Login failed", verification.error);
-      toast.error(verification.error || "Invalid credentials");
+    } catch (error: unknown) {
+      const firebaseError = error as { code?: string };
+      const errorMessage = getFirebaseErrorMessage(firebaseError.code || '');
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -185,10 +198,11 @@ function LoginForm({ onNavigate }: FormProps) {
         </LabelInputContainer>
 
         <button
-          className="group/btn relative block h-10 w-full rounded-md bg-primary font-medium text-primary-foreground shadow-[0px_1px_0px_0px_oklch(var(--primary-foreground)/.25)_inset,0px_-1px_0px_0px_oklch(var(--primary-foreground)/.25)_inset]"
+          className="group/btn relative block h-10 w-full rounded-md bg-primary font-medium text-primary-foreground shadow-[0px_1px_0px_0px_oklch(var(--primary-foreground)/.25)_inset,0px_-1px_0px_0px_oklch(var(--primary-foreground)/.25)_inset] disabled:opacity-50"
           type="submit"
+          disabled={isLoading}
         >
-          Login &rarr;
+          {isLoading ? "Logging in..." : "Login"} &rarr;
           <BottomGradient />
         </button>
 
@@ -252,13 +266,13 @@ export default function UserLogin() {
   //setting the api to scroll by clickng text
   const [api, setApi] = React.useState<CarouselApi>();
 
-  const goToAboutMe = () => {
-    api?.scrollTo(0)
-  }
+  // const goToAboutMe = () => {
+  //   api?.scrollTo(0)
+  // }
 
-  // const goToSignup = () => {
-  //   api?.scrollTo(1);
-  // };
+  const goToSignup = () => {
+    api?.scrollTo(2);
+  };
 
   const goToLogin = () => {
     api?.scrollTo(1);
@@ -273,12 +287,12 @@ export default function UserLogin() {
         </CarouselItem>
         <CarouselItem>
           {" "}
-          <LoginForm onNavigate={goToAboutMe} />{" "}
+          <LoginForm onNavigate={goToSignup} />{" "}
         </CarouselItem>
-        {/* <CarouselItem>
+        <CarouselItem>
           {" "}
           <SignupForm onNavigate={goToLogin} />{" "}
-        </CarouselItem> */}
+        </CarouselItem>
       </CarouselContent>
     </Carousel>
   );
